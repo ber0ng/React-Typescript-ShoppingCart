@@ -42,16 +42,21 @@ export function CartItem ({product_id, quantity}: CartItemProps){
             <img src={"http://127.0.0.1:8000/" + item.file_path} style={{width: "125px", height:"75px", flexBasis: "fit-content"}} />
             <div className="me-auto">
                 <div>
-                    {item.name} {quantity > 1 && <span className="text-muted" style={{fontSize: ".65rem"}}>x{quantity}</span>}
+                    {item.name}{" "}
+                    {quantity > 1 && (
+                        <span className="text-muted" style={{ fontSize: ".65rem" }}>
+                        x{quantity}
+                        </span>
+                    )}
                 </div>
                 <div className="text-muted" style={{fontSize: ".75rem"}}>
                     {formatCurrency(parseFloat(item.new_price))}
                 </div>
-                <div>
-                    {formatCurrency(parseFloat(item.new_price) * quantity)}
-                </div>
-                <Button variant="outline-danger" size="sm" onClick={() => removeFromCart(item.product_id)}>&times;</Button>
             </div>
+            <div>
+                {formatCurrency(parseFloat(item.new_price) * quantity)}
+            </div>
+            <Button variant="outline-danger" size="sm" onClick={() => removeFromCart(item.product_id)}>&times;</Button>
         </Stack>
     )
 }

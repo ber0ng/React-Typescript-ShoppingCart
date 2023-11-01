@@ -1,7 +1,8 @@
 import React from 'react'
 import {Container, Nav, Navbar as NavbarBs, Button} from 'react-bootstrap'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { useShoppingCart } from '../context/ShoppingCartContext'
+
 
 export const Navbar = () => {
 
@@ -15,6 +16,9 @@ export const Navbar = () => {
                 <Nav.Link to='/store' as ={NavLink}>Store</Nav.Link>
                 <Nav.Link to='/about' as ={NavLink}>About</Nav.Link>
             </Nav>
+            <Link to='/login'>
+                <Button variant="outline-primary" style={{ marginRight: '20px' }}>Login</Button>
+            </Link>
             
             <Button 
                 onClick={openCart}
