@@ -8,9 +8,7 @@ import { ShoppingCartProvider } from './context/ShoppingCartContext'
 
 import Signup from './pages/Signup'
 import Login from './pages/Login'
-
-
-
+import TableData from './components/TableData'
 
 
 function App() {
@@ -25,6 +23,7 @@ function App() {
         <Route path='/about' element={<About />} />
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
+        <Route path='/table' element={<TableData />} />
       </Routes>
     </Container>
     </ShoppingCartProvider>
