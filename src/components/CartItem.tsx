@@ -34,7 +34,7 @@ export function CartItem ({product_id, quantity}: CartItemProps){
     }
     const item = data.find((item) => item.product_id === product_id);
     if (!item) {
-        return null; // Handle the case where the item is not found
+        return null; // if item is not found
     }
     
     return(

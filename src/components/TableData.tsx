@@ -1,4 +1,4 @@
-import { Button, Table, Modal, Input, Form, Upload } from 'antd';
+import { Button, Table, Modal, Input, Form } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { StoreItemProps } from './StoreItem';
@@ -13,13 +13,12 @@ const TableData = () => {
     const [addData, setAddData] = useState<StoreItemProps | null>(null);
     const [data, setData] = useState<StoreItemProps[]>([]);
     const [file, setFile] = useState<File | null>(null);
+    const [searchText, setSearchText] = useState("");
     
 
     useEffect(() => {
         getData();
     }, []);
-
-    
 
     // get data from API
     async function getData() {
@@ -106,7 +105,32 @@ const TableData = () => {
         }
     }
 
- 
+    // delete a product
+    const deleteDataRecord = async (record: StoreItemProps) => {
+        Modal.confirm({
+            title: 'Are you sure you want to delete this product?',
+            okText: 'Yes',
+            okType: 'danger',
+            onOk: async () => {
+                try {
+                    const result = await fetch(`http://127.0.0.1:8000/api/admin/product/${record.product_id}`, {
+                        method: 'DELETE', 
+                    });
+                    const response = await result.json();
+                    console.log('API Response:', response);
+                    if (response.ok) {
+                        await getData();
+                        setData((prevData) => prevData.filter((prod) => prod.product_id !== record.product_id));
+                    } else {
+                        console.error('Failed to delete product. Status:', result.status, 'Status Text:', result.statusText);
+                        getData();
+                    }
+                } catch (error) {
+                    console.error('Error while deleting product:', error);
+                }
+            }
+        });
+    }
 
 
     // load data into table columns
@@ -123,6 +147,46 @@ const TableData = () => {
             title: 'Product Name',
             dataIndex: 'name',
             key: 'name',
+            filteredValue: [searchText],
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => {
+                return (
+                    <div style={{ padding: 8 }}>
+                        <Input
+                            placeholder="Search product name"
+                            value={selectedKeys[0]}
+                            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                            onPressEnter={() => {
+                                confirm();
+                            }}
+                            style={{ width: 188, marginBottom: 8, display: 'block' }}
+                        />
+                        <Button
+                            type="primary"
+                            onClick={() => {
+                                confirm();
+                            }}
+                            size="small"
+                            style={{ width: 90, marginRight: 8 }}
+                        >
+                            Search
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                setSelectedKeys([]); // Clear the search input
+                                clearFilters();     // Clear the filter
+                                confirm();   // Refresh the data to display all products
+                            }}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            Reset
+                        </Button>
+                    </div>
+                );
+            },
+            onFilter: (value: string, record: StoreItemProps) => {
+                return record.name.toLowerCase().includes(value.toLowerCase());
+            },
         },
         {
             title: 'Price',
@@ -171,32 +235,7 @@ const TableData = () => {
         setAddData(null);
     }
 
-    // delete a product
-    const deleteDataRecord = async (record: StoreItemProps) => {
-        Modal.confirm({
-            title: 'Are you sure you want to delete this product?',
-            okText: 'Yes',
-            okType: 'danger',
-            onOk: async () => {
-                try {
-                    const result = await fetch(`http://127.0.0.1:8000/api/admin/product/${record.product_id}`, {
-                        method: 'DELETE', 
-                    });
-                    const response = await result.json();
-                    console.log('API Response:', response);
-                    if (response.ok) {
-                        await getData();
-                        setData((prevData) => prevData.filter((prod) => prod.product_id !== record.product_id));
-                    } else {
-                        console.error('Failed to delete product. Status:', result.status, 'Status Text:', result.statusText);
-                        getData();
-                    }
-                } catch (error) {
-                    console.error('Error while deleting product:', error);
-                }
-            }
-        });
-    }
+    
 
     const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0]; // Get the first selected file
@@ -214,12 +253,12 @@ const TableData = () => {
 
     return (
         <div>
-            <Button onClick={() => setIsAdding(true)}>
-                <Modal>
-
-                </Modal>
-                
-                Add Product</Button>
+            <Button onClick={() => setIsAdding(true)}>Add Product</Button>
+            <Input.Search style={{display: 'inline-block', paddingLeft: '20px', width: '200px'}} placeholder='Search here..' 
+                onSearch={(value) => {
+                    setSearchText(value);
+                }}
+            />
             <Table
                 columns={columns}
                 dataSource={data.map(item => ({
@@ -249,7 +288,7 @@ const TableData = () => {
                     }
                 }}
             >
-                <Form id='reset-fields'>
+                <Form>
                     <Form.Item label="Product Name">
                         <input
                             type="text"
